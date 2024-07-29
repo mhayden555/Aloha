@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Phases Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50;
+        }
+
+        #calendar-container {
+            width: 90%;
+            max-width: 1200px;
+            background: #333;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            color: white;
+        }
+
+        #calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #444;
+        }
+
+        #calendar-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        #calendar-body {
+            padding: 20px;
+        }
+
+        #calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+
+        #calendar-days .day {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            background-color: #555;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #calendar-days .day span {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        #calendar-days .day img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 5px;
+        }
+
+        #calendar-days .day:hover {
+            background-color: #666;
+        }
+
+        #calendar-days .today {
+            background-color: #888;
+            color: white;
+        }
+
+        #calendar-days .past {
+            color: #a0a0a0;
+            text-decoration: line-through;
+            background-color: #555;
+            cursor: default;
+        }
+
+        /* Popup Styles */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .popup-content img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .popup-content p {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div id="calendar-container">
+        <div id="calendar-header">
+            <button id="prev-month">&lt;</button>
+            <div id="calendar-month-year">July 2024</div>
+            <button id="next-month">&gt;</button>
+        </div>
+        <div id="calendar-body">
+            <div id="calendar-days">
+                <div class="day">
+                    <span>1</span>
+                    <img src="assets/img/Day_02.jpg" alt="New Moon">
+                </div>
+                <div class="day">
+                    <span>2</span>
+                    <img src="assets/img/Day_03.jpg" alt="Waxing Crescent">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <img id="popup-img" src="" alt="Moon phase image">
+            <p id="popup-text"></p>
+        </div>
+    </div>
+
+    <script>
+        const calendarDays = document.getElementById('calendar-days');
+        const popup = document.getElementById('popup');
+        const popupImg = document.getElementById('popup-img');
+        const popupText = document.getElementById('popup-text');
+
+        function showPopup(element) {
+            const img = element.querySelector('img');
+            const span = element.querySelector('span');
+            popupImg.src = img.src;
+            popupText.textContent = `Moon phase on ${span.textContent}`;
+            const rect = element.getBoundingClientRect();
+            popup.style.top = `${rect.top}px`;
+            popup.style.left = `${rect.right + 20}px`;
+            popup.style.display = 'block';
+        }
+
+        function hidePopup() {
+            popup.style.display = 'none';
+        }
+
+        document.querySelectorAll('#calendar-days .day').forEach(day => {
+            day.addEventListener('mouseenter', () => showPopup(day));
+            day.addEventListener('mouseleave', hidePopup);
+        });
+    </script>
+</body>
+</html>

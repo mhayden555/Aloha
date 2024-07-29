@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moon Phases Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50;
+        }
+
+        #calendar-container {
+            width: 90%;
+            max-width: 1200px;
+            background: #333;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            color: white;
+        }
+
+        #calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background-color: #444;
+        }
+
+        #calendar-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2em;
+            cursor: pointer;
+        }
+
+        #calendar-body {
+            padding: 20px;
+        }
+
+        #calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            text-align: center;
+        }
+
+        #calendar-days .day {
+            position: relative;
+            width: 100%;
+            padding-top: 100%;
+            background-color: #555;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #calendar-days .day span {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 1.2em;
+            z-index: 1;
+            /* Ensure the date number is above the image */
+        }
+
+        #calendar-days .day img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 5px;
+            z-index: 0;
+            /* Ensure the image is below the date number */
+        }
+
+        #calendar-days .day:hover {
+            background-color: #666;
+        }
+
+        #calendar-days .today {
+            background-color: #888;
+            color: white;
+        }
+
+        #calendar-days .past {
+            color: #a0a0a0;
+            text-decoration: line-through;
+            background-color: #555;
+            cursor: default;
+        }
+
+        @media (max-width: 768px) {
+            #calendar-container {
+                max-width: 90%;
+            }
+
+            #calendar-header {
+                padding: 10px;
+            }
+
+            #calendar-header button {
+                font-size: 1.5em;
+            }
+
+            #calendar-days .day {
+                padding-top: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #calendar-container {
+                max-width: 90%;
+            }
+
+            #calendar-header {
+                padding: 5px;
+            }
+
+            #calendar-header button {
+                font-size: 1.2em;
+            }
+
+            #calendar-days .day {
+                padding-top: 100%;
+            }
+        }
+
+        /* Popup Styles */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .popup-content img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .popup-content p {
+            margin-top: 10px;
+            font-size: 1em;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="calendar-container">
+        <div id="calendar-header">
+            <button id="prev-month">&lt;</button>
+            <div id="calendar-month-year"></div>
+            <button id="next-month">&gt;</button>
+        </div>
+        <div id="calendar-body">
+            <div id="calendar-days">
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <img id="popup-img" alt="Moon phase image">
+            <p id="popup-text"></p>
+        </div>
+    </div>
+
+    <script>
+        const calendarContainer = document.getElementById('calendar-container');
+        const calendarHeader = document.getElementById('calendar-header');
+        const calendarDays = document.getElementById('calendar-days');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const monthYearDisplay = document.getElementById('calendar-month-year');
+        const popup = document.getElementById('popup');
+        const popupImg = document.getElementById('popup-img');
+        const popupText = document.getElementById('popup-text');
+
+        // Moon phases array with descriptions
+        const moonPhases = [
+            { image: 'assets/img/moonPhases/Day_02.jpg', description: 'The Moon is moving further away from the Sun, so it sets later each night. The Moon is still low near the horizon, but in darker skies with the better contrast a dark sky creates. The Moons thin crescent will be visible for a few hours after sunset, low in the west. The prominent craters on tonights tour all lie on the terminator, which splits them midway, half being in light, half in darkness'},
+            { image: 'assets/img/moonPhases/Day_03.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_04.jpg', description: 'Half of the moon is visible.' },
+            { image: 'assets/img/moonPhases/Day_05.jpg', description: 'More than half of the moon is visible.' },
+            { image: 'assets/img/moonPhases/Day_06.jpg', description: 'The entire moon is visible.' },
+            { image: 'assets/img/moonPhases/Day_07.jpg', description: 'More than half of the moon is visible.' },
+            { image: 'assets/img/moonPhases/Day_08.jpg', description: 'Half of the moon is visible.' },
+            { image: 'assets/img/moonPhases/Day_09.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_10.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_11.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_16.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_17.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_18.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_19.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_20.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_21.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_22.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_23.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_24.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_26.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_27.jpg', description: 'The moon is partly visible as a crescent.' },
+            { image: 'assets/img/moonPhases/Day_28.jpg', description: 'The moon is partly visible as a crescent.' },
+
+
+        ];
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        function updateCalendar(month, year) {
+            const firstDay = new Date(year, month).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+
+            calendarDays.innerHTML = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                calendarDays.innerHTML += `<div></div>`;
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                const isPast = year < today.getFullYear() || (year === today.getFullYear() && month < today.getMonth()) || (year === today.getFullYear() && month === today.getMonth() && i < today.getDate());
+
+                const dayDiv = document.createElement('div');
+                dayDiv.className = `day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}`;
+                const daySpan = document.createElement('span');
+                daySpan.textContent = i;
+                dayDiv.appendChild(daySpan);
+
+                // Cycle through the moon phases
+                const phaseIndex = (i - 1) % moonPhases.length;
+                const moonPhase = moonPhases[phaseIndex];
+                const imgSrc = moonPhase.image;  // Use the image path directly from the array
+                console.log(`Loading image: ${imgSrc}`); // Debug log to check image paths
+
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = 'Moon Phase';
+                dayDiv.appendChild(img);
+
+                // Store the description in the data attribute for use in the popup
+                dayDiv.dataset.description = moonPhase.description;
+
+                dayDiv.addEventListener('mouseenter', () => showPopup(dayDiv));
+                dayDiv.addEventListener('mouseleave', hidePopup);
+
+                calendarDays.appendChild(dayDiv);
+            }
+
+            monthYearDisplay.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} - ${year}`;
+        }
+
+        function showPopup(element) {
+            const img = element.querySelector('img');
+            const span = element.querySelector('span');
+            popupImg.src = img.src;
+            popupText.textContent = `Moon phase on ${span.textContent}: ${element.dataset.description}`;
+            const rect = element.getBoundingClientRect();
+            popup.style.top = `${rect.top}px`;
+            popup.style.left = `${rect.right + 20}px`;
+            popup.style.display = 'block';
+        }
+
+        function hidePopup() {
+            popup.style.display = 'none';
+        }
+
+        prevMonthBtn.addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            updateCalendar(currentMonth, currentYear);
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateCalendar(currentMonth, currentYear);
+        });
+
+        updateCalendar(currentMonth, currentYear);
+
+    </script>
+</body>
+
+</html>

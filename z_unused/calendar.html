@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Calendar</title>
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        #calendar-container {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        #calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        #calendar-header button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        #calendar-body {
+            padding: 10px;
+        }
+
+        #calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+
+        #calendar-days div {
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #calendar-days .today {
+            background-color: #2c3e50;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            #calendar-header {
+                padding: 5px;
+            }
+
+            #calendar-header button {
+                font-size: 1.2em;
+            }
+
+            #calendar-days div {
+                padding: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #calendar-header {
+                padding: 5px 2px;
+            }
+
+            #calendar-header button {
+                font-size: 1em;
+            }
+
+            #calendar-days div {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="calendar-container">
+        <div id="calendar-header">
+            <button id="prev-month">&lt;</button>
+            <div id="calendar-month-year"></div>
+            <button id="next-month">&gt;</button>
+        </div>
+        <div id="calendar-body">
+            <div id="calendar-days"></div>
+        </div>
+    </div>
+
+    <script>
+        const calendarContainer = document.getElementById('calendar-container');
+        const calendarHeader = document.getElementById('calendar-header');
+        const calendarDays = document.getElementById('calendar-days');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const monthYearDisplay = document.getElementById('calendar-month-year');
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        function updateCalendar(month, year) {
+            const firstDay = new Date(year, month).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const today = new Date();
+
+            calendarDays.innerHTML = '';
+
+            for (let i = 0; i < firstDay; i++) {
+                calendarDays.innerHTML += `<div></div>`;
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const isToday = i === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+                const isPast = year < today.getFullYear() || (year === today.getFullYear() && month < today.getMonth()) || (year === today.getFullYear() && month === today.getMonth() && i < today.getDate());
+
+                calendarDays.innerHTML += `<div class="${isToday ? 'today' : ''} ${isPast ? 'past' : ''}">${i}</div>`;
+            }
+
+            monthYearDisplay.textContent = `${new Date(year, month).toLocaleString('default', { month: 'long' })} - ${year}`;
+        }
+
+        prevMonthBtn.addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            updateCalendar(currentMonth, currentYear);
+        });
+
+        nextMonthBtn.addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateCalendar(currentMonth, currentYear);
+        });
+
+        updateCalendar(currentMonth, currentYear);
+
+    </script>
+</body>
+
+</html>
