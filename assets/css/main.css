@@ -1745,6 +1745,16 @@ section,
 .events .card:hover .card-body .card-title a {
   color: var(--accent-color);
 }
+.events .card-body .btn-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px; /* Adjust as needed */
+}
+
+.events .card-body .btn {
+  display: inline-block;
+}
+
 
 /*--------------------------------------------------------------
 # Pricing Section
